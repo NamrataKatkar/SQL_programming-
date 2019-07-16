@@ -1,0 +1,254 @@
+--------------------------------------------------------------------
+Question 1 / 10
+--------------------------------------------------------------------
+
+Order Sample Data:
+
+ORDER_DAY         ORDER_ID            PRODUCT_ID   QUANTITY     PRICE
+
+------------------ -------------------- ---------- ---------- ----------
+
+01-JUL-11         O1                  P1                 5          5
+
+01-JUL-11         O2                  P2                 2         10
+
+01-JUL-11         O3                  P3                10         25
+
+01-JUL-11         O4                  P1                20          5
+
+02-JUL-11         O5                  P3                 5         25
+
+02-JUL-11         O6                  P4                 6         20
+
+02-JUL-11         O7                  P1                 2          5
+
+02-JUL-11         O8                  P5                 1         50
+
+02-JUL-11         O9                  P6                 2         50
+
+02-JUL-11         O10                 P2                 4         10
+
+Get me all products that got sold on both the days and the number of times the product is sold.  Desired output
+
+ 
+
+PRODUCT_ID  COUNT
+
+P1            3
+
+P2            2
+
+P3            2
+
+
+The following table has been created for you
+
+CREATE TABLE ORDERS
+
+(
+
+   ORDER_DAY    DATE,
+
+   ORDER_ID     VARCHAR2 (20),
+
+   PRODUCT_ID   VARCHAR2 (10),
+
+   QUANTITY     NUMBER,
+
+   PRICE        NUMBER
+
+);
+
+ 
+
+Answer:
+
+select product_id,count(*)
+from orders 
+group by product_id having count( distinct order_day)>1
+
+--------------------------------------------------------------------
+Question 2 / 10
+--------------------------------------------------------------------
+
+Order Sample data:
+
+ORDER_DAY         ORDER_ID            PRODUCT_ID   QUANTITY     PRICE
+
+------------------ -------------------- ---------- ---------- ----------
+
+01-JUL-11         O1                  P1                 5          5
+
+01-JUL-11         O2                  P2                 2         10
+
+01-JUL-11         O3                  P3                10         25
+
+01-JUL-11         O4                  P1                20          5
+
+02-JUL-11         O5                  P3                 5         25
+
+02-JUL-11         O6                  P4                 6         20
+
+02-JUL-11         O7                  P1                 2          5
+
+02-JUL-11         O8                  P5                 1         50
+
+02-JUL-11         O9                  P6                 2         50
+
+02-JUL-11         O10                 P2                 4         10
+
+Get me products that was ordered on 02-Jul-11  but not on 01-Jul-11
+desired output 
+
+P4
+
+P5
+
+P6
+
+Answer:
+select PRODUCT_ID from orders where order_day='02-JUL-11'
+minus
+select PRODUCT_ID from orders where order_day='01-JUL-11'
+ 
+--------------------------------------------------------------------
+Question 3 / 10
+--------------------------------------------------------------------
+
+Order Sample data:
+
+ORDER_DAY      ORDER_ID       PRODUCT_ID   QUANTITY       PRICE
+
+------------------ -------------------- ---------- ---------- ----------
+
+01-JUL-11      O1             P1              5        5
+
+01-JUL-11      O2             P2              2       10
+
+01-JUL-11      O3             P3             10       25
+
+01-JUL-11      O4             P1             20        5
+
+02-JUL-11      O5             P3              5       25
+
+02-JUL-11      O6             P4              6       20
+
+02-JUL-11      O7             P1              2        5
+
+02-JUL-11      O8             P5              1       50
+
+02-JUL-11      O9             P6              2       50
+
+02-JUL-11      O10            P2              4       10
+
+
+Get me highest sold Products (Qty* Price) on both days , desired output 
+
+DATE      PRODUCT_ID SOLD_AMOUNT
+
+01-JUL-11      P3        250
+
+02-JUL-11      P3        125
+
+Answer:
+select ORDER_DAY,PRODUCT_ID,SOLD_AMOUNT from (
+select ORDER_DAY,  PRODUCT_ID, sum(QUANTITY*PRICE) as SOLD_AMOUNT,
+rank() over(order by SOLD_AMOUNT desc) as rnk
+from orders
+group by ORDER_DAY,  PRODUCT_ID) where rnk=1
+
+--------------------------------------------------------------------
+Question 4 / 10
+--------------------------------------------------------------------
+
+Order Sample data:
+
+ORDER_DAY         ORDER_ID            PRODUCT_ID   QUANTITY     PRICE
+
+------------------ -------------------- ---------- ---------- ----------
+
+01-JUL-11         O1                  P1                 5          5
+
+01-JUL-11         O2                  P2                 2         10
+
+01-JUL-11         O3                  P3                10         25
+
+01-JUL-11         O4                  P1                20          5
+
+02-JUL-11         O5                  P3                 5         25
+
+02-JUL-11         O6                  P4                 6         20
+
+02-JUL-11         O7                  P1                 2          5
+
+02-JUL-11         O8                  P5                 1         50
+
+02-JUL-11         O9                  P6                 2         50
+
+02-JUL-11         O10                 P2                 4         10
+
+Get me for all products, total sales on 01-JUL-11 and 02-JUL-11 adjacent to each other
+
+Desired Output:
+
+P1 125 10
+
+P2 20 40
+
+P3 250 125
+
+P4 0 120
+
+P5 0 50
+
+P6 0 100
+
+
+Answer:
+
+select PRODUCT_ID,sum(QUANTITY*PRICE) as SOLD_AMOUNT1, 0 as  SOLD_AMOUNT2  from orders where ORDER_DAY='01-JUL-11' group by PRODUCT_ID
+union 
+select PRODUCT_ID,0 as SOLD_AMOUNT1, sum(QUANTITY*PRICE) as  SOLD_AMOUNT2  from orders where ORDER_DAY='02-JUL-11' group by PRODUCT_ID
+
+--------------------------------------------------------------------
+Question 5 / 10
+--------------------------------------------------------------------
+
+Order Sample data:
+
+
+ORDER_DAY         ORDER_ID            PRODUCT_ID   QUANTITY     PRICE
+
+------------------ -------------------- ---------- ---------- ----------
+
+01-JUL-11         O1                  P1                 5          5
+
+01-JUL-11         O2                  P2                  2         10
+
+01-JUL-11         O3                  P3                10         25
+
+01-JUL-11         O4                  P1                20          5
+
+02-JUL-11         O5                  P3                 5         25
+
+02-JUL-11         O6                  P4                 6         20
+
+02-JUL-11         O7                  P1                 2          5
+
+02-JUL-11         O8                  P5                 1         50
+
+02-JUL-11         O9                  P6                 2         50
+
+02-JUL-11         O10                 P2                 4         10
+
+Get me all products daywise, that was ordered more than once
+Desired output:
+
+01-JUL-11 P1
+
+Answer:
+
+select ORDER_DAY,PRODUCT_ID, count(*)
+from orders
+group by ORDER_DAY,PRODUCT_ID
+having count(*)>1
