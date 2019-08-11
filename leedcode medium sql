@@ -1,0 +1,114 @@
+177. Nth Highest Salary
+Write a SQL query to get the nth highest salary from the Employee table.
+
++----+--------+
+| Id | Salary |
++----+--------+
+| 1  | 100    |
+| 2  | 200    |
+| 3  | 300    |
++----+--------+
+For example, given the above Employee table, the nth highest salary where n = 2 is 200. If there is no nth highest salary, then the query should return null.
+
++------------------------+
+| getNthHighestSalary(2) |
++------------------------+
+| 200                    |
++------------------------+
+
+Answer:
+select 
+	distinct salary as getNthHighestSalary 
+	from 
+        (select ID,Salary,dense_rank() over ( order by salary desc) as rnk from employee) a
+        where a.rnk=2
+		
+-----------------------------------------------------------------------------------------------------------------------
+		
+184. Department Highest Salary
+
+The Employee table holds all employees. Every employee has an Id, a salary, and there is also a column for the department Id.
+
++----+-------+--------+--------------+
+| Id | Name  | Salary | DepartmentId |
++----+-------+--------+--------------+
+| 1  | Joe   | 70000  | 1            |
+| 2  | Jim   | 90000  | 1            |
+| 3  | Henry | 80000  | 2            |
+| 4  | Sam   | 60000  | 2            |
+| 5  | Max   | 90000  | 1            |
++----+-------+--------+--------------+
+The Department table holds all departments of the company.
+
++----+----------+
+| Id | Name     |
++----+----------+
+| 1  | IT       |
+| 2  | Sales    |
++----+----------+
+Write a SQL query to find employees who have the highest salary in each of the departments. For the above tables, your SQL query should return the following rows (order of rows does not matter).
+
++------------+----------+--------+
+| Department | Employee | Salary |
++------------+----------+--------+
+| IT         | Max      | 90000  |
+| IT         | Jim      | 90000  |
+| Sales      | Henry    | 80000  |
++------------+----------+--------+
+Explanation:
+
+Max and Jim both have the highest salary in the IT department and Henry has the highest salary in the Sales department.
+
+
+Answer:
+
+select Department,employee,salary from (
+	select d.name as Department, e.name as employee,e.salary,
+	dense_rank() over (partition by e.departmentid order by e.salary desc) as rnk
+	from Employee e join department d
+	on e.DepartmentId=d.id) a
+where a.rnk =1
+
+-----------------------------------------------------------------------------------------------------------------------
+180. Consecutive Numbers
+Write a SQL query to find all numbers that appear at least three times consecutively.
+
++----+-----+
+| Id | Num |
++----+-----+
+| 1  |  1  |
+| 2  |  1  |
+| 3  |  1  |
+| 4  |  2  |
+| 5  |  1  |
+| 6  |  2  |
+| 7  |  2  |
++----+-----+
+For example, given the above Logs table, 1 is the only number that appears consecutively for at least three times.
+
++-----------------+
+| ConsecutiveNums |
++-----------------+
+| 1               |
++-----------------+
+
+Answer:
+Solution1 (Reading a table thrice):
+select distinct a.num as ConsecutiveNums
+    from Logs a,
+         Logs b,
+         Logs c
+    where a.Id+1=b.Id and b.Id+1=c.Id and a.num=b.num and b.num=c.num
+	
+Solution2 (Window function):
+
+select  num as ConsecutiveNums  from (
+select 
+id,
+num,
+lead(num,1) over(order by id)as lead1,
+lead(num,2) over(order by id)as lead2
+from logs) a
+where a.num=a.lead1 and a.num=a.lead2
+group by num
+
